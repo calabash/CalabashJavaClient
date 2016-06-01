@@ -97,15 +97,11 @@ public class Element implements Gestureable, Existable {
     public Element enterText(String text) {
         ensureExists();
         System.out.println("I enter text: '" + text + "' into " + desc());
-        if (raw.has("id")) {
-            device.gestureTestID(testID, "{'gesture' : 'enter_text_in', 'specifiers' : { }, 'options' : {'string' : \"" + text + "\"} }");
-        } else if (raw.has("text")) {
-            device.gestureTestID(testID, "{'gesture' : 'enter_text_in', 'specifiers' : { }, 'options' : {'string' : \"" + text + "\"}}");
-        } else if (raw.has("label")) {
-            device.gestureTestID(testID, "{'gesture' : 'enter_text_in', 'specifiers' : { }, 'options' : {'string' : \"" + text + "\"}}");
-        } else if (raw.has("placeholder")) {
-            device.gestureTestID(testID, "{'gesture' : 'enter_text_in', 'specifiers' : { }, 'options' : {'string' : \"" + text + "\"}}");
-        }
+        device.gestureTestID(testID,
+                "{'gesture' : 'enter_text_in', " +
+                        "'specifiers' : { }, " +
+                        "'options' : { 'string' : \"" + text + "\"} " +
+                        "}");
         return this;
     }
 }
