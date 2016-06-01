@@ -1,6 +1,7 @@
 package com.xamarin.core.Elements;
 
 import com.xamarin.core.Device;
+import com.xamarin.core.Exceptions.ElementNoLongerExistsException;
 import com.xamarin.core.Query;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -81,12 +82,20 @@ public class Element implements Gestureable, Existable {
     }
 
     public Element tap() {
+        ensureExists();
         System.out.println("I tap '" + desc() + "'");
         device.gestureTestID(testID, "{'gesture' : 'touch', 'specifiers' : {}}");
         return this;
     }
 
+    private void ensureExists() {
+        if (!this.exists()) {
+            throw new ElementNoLongerExistsException();
+        }
+    }
+
     public Element enterText(String text) {
+        ensureExists();
         System.out.println("I enter text: '" + text + "' into " + desc());
         if (raw.has("id")) {
             device.gestureTestID(testID, "{'gesture' : 'enter_text_in', 'specifiers' : { }, 'options' : {'string' : \"" + text + "\"} }");

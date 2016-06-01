@@ -1,6 +1,8 @@
 package com.xamarin.core;
 
 import com.xamarin.core.Exceptions.DeviceAgentNotRunningException;
+import com.xamarin.core.Wait.Condition;
+import com.xamarin.core.Wait.Wait;
 import com.xamarin.utils.Net;
 import com.xamarin.utils.ShellCommand;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -96,10 +98,18 @@ public class Device {
     }
 
     public void startDeviceAgent() {
-        ShellCommand.shell(String.format("xctestctl -d %s " +
-                        "-r $HOME/.calabash/DeviceAgent/CBX-Runner.app " +
-                        "-t $HOME/.calabash/DeviceAgent/CBX-Runner.app/PlugIns/CBX.xctest",
-                this.deviceID));
+        ShellCommand.shell(new String[] {
+                "/usr/local/bin/xctestctl",
+                "-d", this.deviceID,
+                "-r", "$HOME/.calabash/DeviceAgent/CBX-Runner.app",
+                "-t", "$HOME/.calabash/DeviceAgent/CBX-Runner.app/PlugIns/CBX.xctest"
+        });
+        Wait.until(new Condition() {
+            @Override
+            public boolean check() {
+                return deviceAgentIsRunning();
+            }
+        });
         ensureDeviceAgentRunning();
     }
 

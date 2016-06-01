@@ -19,11 +19,15 @@ public class Wait {
             public void run() {
                 Date start = new Date();
                 while ( new Date().getTime() - start.getTime() < timeout) {
-                    if (condition.check()) {
-                        synchronized (condition) {
-                            condition.notify();
-                            return;
+                    try {
+                        if (condition.check()) {
+                            synchronized (condition) {
+                                condition.notify();
+                                return;
+                            }
                         }
+                    } catch (Exception e) {
+                        //silence
                     }
                 }
                 throw new TimeoutException();
