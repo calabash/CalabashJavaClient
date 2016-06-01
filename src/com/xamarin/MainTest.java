@@ -1,5 +1,8 @@
-package com.company;
+package com.xamarin;
 
+import com.xamarin.core.App;
+import com.xamarin.core.Device;
+import com.xamarin.core.Element;
 import junit.framework.TestCase;
 
 import java.awt.*;

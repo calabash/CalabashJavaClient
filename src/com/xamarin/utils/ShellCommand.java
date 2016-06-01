@@ -1,4 +1,4 @@
-package com.company;
+package com.xamarin.utils;
 
 import com.sun.javafx.beans.annotations.NonNull;
 

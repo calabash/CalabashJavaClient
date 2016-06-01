@@ -1,5 +1,6 @@
-package com.company;
+package com.xamarin.core;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -10,15 +11,17 @@ public class Element {
     public String testID;
     private JSONObject raw;
     private Device device;
+    private JSONObject queryParams;
 
     public Element(JSONObject raw, Device xdb) {
         this.raw = raw;
         this.device = xdb;
+        this.queryParams = new JSONObject();
 
         try {
             this.testID = raw.getString("test_id");
-        } catch (JSONException e1) {
-            e1.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
@@ -80,5 +83,33 @@ public class Element {
         } else if (raw.has("placeholder")) {
             device.gestureTestID(testID, "{'gesture' : 'enter_text_in', 'specifiers' : { }, 'options' : {'string' : \"" + text + "\"}}");
         }
+    }
+
+    public void setParam(String key, JSONObject value) {
+        try {
+            this.queryParams.put(key, value);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setParam(String key, String value) {
+        try {
+            this.queryParams.put(key, value);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setParam(String key, JSONArray value) {
+        try {
+            this.queryParams.put(key, value);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public JSONObject getQueryParams() {
+        return this.queryParams;
     }
 }

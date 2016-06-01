@@ -1,7 +1,7 @@
-package com.company;
+package com.xamarin.core;
 
+import com.xamarin.utils.Net;
 import edu.umd.cs.findbugs.annotations.NonNull;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.URI;

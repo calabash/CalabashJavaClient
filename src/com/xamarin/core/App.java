@@ -1,4 +1,4 @@
-package com.company;
+package com.xamarin.core;
 
 import com.sun.javafx.beans.annotations.NonNull;
 import org.json.JSONArray;
@@ -15,11 +15,11 @@ public class App {
     public String bundleID;
     private Device device;
 
-    public App(String bundleID, Device xdb) {
+    public App(String bundleID, Device device) {
         System.out.println("Application: " + bundleID);
 
         this.bundleID = bundleID;
-        this.device = xdb;
+        this.device = device;
     }
 
     private ArrayList<Element> query(String json) {
