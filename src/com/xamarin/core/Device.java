@@ -1,6 +1,8 @@
 package com.xamarin.core;
 
+import com.xamarin.core.Exceptions.DeviceAgentNotRunningException;
 import com.xamarin.utils.Net;
+import com.xamarin.utils.ShellCommand;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import org.json.JSONObject;
 
@@ -12,23 +14,20 @@ import java.net.URISyntaxException;
  */
 public class Device {
     private String serverURL;
+    private String deviceID;
     private static final String DEFAULT_SERVER_URL = "http://127.0.0.1:27753"; //localhost
 
-    public Device(String serverURL) {
-        this.serverURL = serverURL;
-    }
-    public Device() {
-        this(DEFAULT_SERVER_URL);
-    }
-    public static Device defaultDevice() {
-        return new Device();
+    public Device(String deviceID) {
+        this.serverURL = DEFAULT_SERVER_URL;
+        this.deviceID = deviceID;
     }
 
-    public String route(String routeName) {
+    private String route(String routeName) {
         return this.serverURL + "/1.0/" + routeName;
     }
 
     public void killSession() {
+        ensureDeviceAgentRunning();
         try {
             Net.delete(new URI(route("session")));
         } catch (URISyntaxException e) {
@@ -36,20 +35,26 @@ public class Device {
         }
     }
 
-    public App launchApp(String bundleID) {
+    public App launch(App app) {
+        ensureDeviceAgentRunning();
         try {
             killSession();
             Thread.sleep(1000);
-            Net.postJSON(new URI(route("session")), "{ 'bundleID' : '" + bundleID + "' }");
+            Net.postJSON(new URI(route("session")), "{ 'bundleID' : '" + app.bundleID + "' }");
             Thread.sleep(1000);
-            return new App(bundleID, this);
+            return app;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
+    public JSONObject query(Query query) {
+        return query(query.getJson().toString());
+    }
+
     public JSONObject query(String json) {
+        ensureDeviceAgentRunning();
         try {
             return Net.postJSON(new URI(route("query")), json);
         } catch (URISyntaxException e) {
@@ -59,6 +64,7 @@ public class Device {
     }
 
     public JSONObject gesture(String json) {
+        ensureDeviceAgentRunning();
         try {
             Thread.sleep(500);
             return Net.postJSON(new URI(route("gesture")), json);
@@ -69,6 +75,7 @@ public class Device {
     }
 
     public JSONObject gestureTestID(@NonNull String testID, @NonNull String json) {
+        ensureDeviceAgentRunning();
         try {
             Thread.sleep(500);
             return Net.postJSON(new URI(route("gesture/" + testID)), json);
@@ -79,11 +86,38 @@ public class Device {
     }
 
     public JSONObject queryTestId(String testID) {
+        ensureDeviceAgentRunning();
         try {
             return Net.get(new URI(route("query/test_id/" + testID)));
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void startDeviceAgent() {
+        ShellCommand.shell(String.format("xctestctl -d %s " +
+                        "-r $HOME/.calabash/DeviceAgent/CBX-Runner.app " +
+                        "-t $HOME/.calabash/DeviceAgent/CBX-Runner.app/PlugIns/CBX.xctest",
+                this.deviceID));
+        ensureDeviceAgentRunning();
+    }
+
+    public void ensureDeviceAgentRunning() {
+        if (!deviceAgentIsRunning()) {
+            throw new DeviceAgentNotRunningException();
+        }
+    }
+
+    public boolean deviceAgentIsRunning() {
+        try {
+            JSONObject response = Net.get(new URI(this.serverURL + "/ping"));
+            if (response != null && response.has("status") && response.get("status").equals("honk")) {
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

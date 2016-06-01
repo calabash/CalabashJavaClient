@@ -1,36 +1,57 @@
 package com.xamarin.core;
 
-import com.sun.javafx.beans.annotations.NonNull;
+import com.xamarin.core.Elements.Element;
+import com.xamarin.core.Elements.ElementList;
+import com.xamarin.core.Exceptions.AmbiguousMatchException;
+import com.xamarin.core.Wait.Condition;
+import com.xamarin.core.Wait.Wait;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.awt.*;
-import java.util.ArrayList;
 
 /**
  * Created by chrisf on 5/25/16.
  */
 public class App {
-    public String bundleID;
-    private Device device;
+    public String bundleID = null;
+    public String pathToBundle = null;
+    protected Device device;
 
-    public App(String bundleID, Device device) {
-        System.out.println("Application: " + bundleID);
-
-        this.bundleID = bundleID;
+    public void setDevice(Device device) {
         this.device = device;
     }
 
-    private ArrayList<Element> query(String json) {
-        ArrayList<Element> elements = new ArrayList<>();
-        JSONObject results = device.query(json);
+    public ElementList elements() {
+        return query("{ 'type' : 'any' }", this.device);
+    }
+
+    public ElementList all() {
+        return query("{ 'type' : 'any' }", this.device);
+    }
+
+    public App(String bundleID) {
+        this(bundleID, null);
+    }
+
+    public App(String bundleID, String pathToBundle) {
+        System.out.println("Application: " + (bundleID == null ? pathToBundle : bundleID));
+
+        this.bundleID = bundleID;
+        this.pathToBundle = pathToBundle;
+    }
+
+    public static ElementList query(String json, Device device) {
+        return query(new Query(json), device);
+    }
+
+    public static ElementList query(Query query, Device device) {
+        ElementList elements = null;
+        JSONObject results = device.query(query);
         try {
             JSONArray es = results.getJSONArray("result");
-            for (int i = 0; i < es.length(); i++) {
-                JSONObject e = es.getJSONObject(i);
-                elements.add(new Element(e, this.device));
-            }
+            elements = new ElementList(es, device, query);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -55,33 +76,6 @@ public class App {
         return null;
     }
 
-    public Element elementWithID(@NonNull String id) {
-        ArrayList<Element> res = elementsWithID(id);
-        return res.size() > 0 ? res.get(0) : null;
-    }
-
-    public Element elementWithText(@NonNull String text) {
-        ArrayList<Element> res = elementsWithText(text);
-        return res.size() > 0 ? res.get(0) : null;
-    }
-
-    public Element elementWithType(@NonNull String type) {
-        ArrayList<Element> res = elementsWithType(type);
-        return res.size() > 0 ? res.get(0) : null;
-    }
-
-    public ArrayList<Element> elementsWithID(@NonNull String id) {
-        return query("{ 'id' : " + id + " }");
-    }
-
-    public ArrayList<Element> elementsWithText(@NonNull String text) {
-        return query("{ 'text' : " + text + " }");
-    }
-
-    public ArrayList<Element> elementsWithType(@NonNull String type) {
-        return query("{ 'type' : " + type + " }");
-    }
-
     public void dragCoordinates(Point one, Point two) {
         System.out.println(String.format("I drag from %d, %d to %d, %d", one.x, one.y, two.x, two.y));
         gesture("drag", "{ 'coordinates' : [[" + one.x + ", " + one.y + "], [" + two.x + ", " + two.y + "]]}");
@@ -90,5 +84,33 @@ public class App {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public Element enterText(Element element, String text) {
+        return element.enterText(text);
+    }
+
+    public Element enterText(ElementList elements, String text) throws AmbiguousMatchException {
+        return elements.enterText(text);
+    }
+
+    public Element tap(Element element) {
+        return element.tap();
+    }
+
+    public Element tap(ElementList elements) throws AmbiguousMatchException {
+        return elements.tap();
+    }
+
+    public void waitForElement(final ElementList element) {
+        element.waitUntilExists();
+    }
+
+    public void waitUntil(final Condition condition) {
+        Wait.until(condition);
+    }
+
+    public void waitForElementToNotExist(final ElementList element) {
+        element.waitUntilDoesntExist();
     }
 }
