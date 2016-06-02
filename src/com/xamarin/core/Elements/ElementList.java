@@ -82,9 +82,13 @@ public class ElementList implements Gestureable, Existable, Iterable<Element> {
     }
 
     public Element scroll(Direction direction) {
+        return scroll(direction, 0.70);
+    }
+
+    public Element scroll(Direction direction, double amount) {
         ensureOneMatch();
         Element match = this.first();
-        return match.scroll(direction);
+        return match.scroll(direction, amount);
     }
 
     public Element scrollDownToUp() {
@@ -103,10 +107,14 @@ public class ElementList implements Gestureable, Existable, Iterable<Element> {
         return scroll(Direction.rightToLeft);
     }
 
-    public boolean atLeastOneExists() {
-        return exists();
+    public Element swipeLeft() {
+        return scroll(Direction.rightToLeft, 0.99);
     }
 
+    public Element swipeRight() {
+        return scroll(Direction.leftToRight);
+    }
+    
     /*
         Returns true if any of its elements exist
      */
@@ -120,7 +128,11 @@ public class ElementList implements Gestureable, Existable, Iterable<Element> {
         return false;
     }
 
-    public void waitUntilExists() {
+    public boolean atLeastOneExists() {
+        return exists();
+    }
+
+    public void waitUntilAnyExist() {
         Wait.until(new ExistsCondition(this),
                 String.format("Timeout waiting for element(s): %s", this.query));
     }

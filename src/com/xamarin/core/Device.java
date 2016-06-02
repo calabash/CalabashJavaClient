@@ -4,6 +4,7 @@ import com.xamarin.core.Exceptions.DeviceAgentNotRunningException;
 import com.xamarin.core.Exceptions.TimeoutException;
 import com.xamarin.core.Wait.Condition;
 import com.xamarin.core.Wait.Wait;
+import com.xamarin.utils.Geometry;
 import com.xamarin.utils.Net;
 import com.xamarin.utils.ShellCommand;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -211,11 +212,14 @@ public class Device {
         return null;
     }
 
-    public JSONObject screen() {
+    public Rectangle screen() {
         try {
             JSONObject results = Net.get(new URI(route("device")));
             if (results != null) {
-                return results.getJSONObject("screen");
+                JSONObject screen = results.getJSONObject("screen");
+                screen.put("x", 0);
+                screen.put("y", 0);
+                return Geometry.jsonToRectangle(screen);
             }
         } catch (Exception e) {
             e.printStackTrace();

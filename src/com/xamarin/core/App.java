@@ -90,7 +90,7 @@ public class App {
     }
 
     public Element waitUntilAnyExist(final ElementList elements) {
-        elements.waitUntilExists();
+        elements.waitUntilAnyExist();
         return elements.first();
     }
 
@@ -128,27 +128,29 @@ public class App {
     }
 
 
-    public void swipeLeft() {
-        JSONObject screen = device.screen();
-        try {
-            int midY = screen.getInt("height") / 2;
-            int maxX = (int)(0.99 * screen.getInt("width"));
-            int minX = (int)(0.01 * maxX);
-            device.dragCoordinates(new Point(maxX, midY), new Point(minX, midY));
-        } catch (JSONException e) {
-            e.printStackTrace();
+    public void swipe(Direction direction) {
+        Rectangle screen = device.screen();
+        int midY = screen.height / 2;
+        int rightX = (int)(0.99 * screen.width);
+        int leftX = (int)(0.01 * rightX);
+
+        switch (direction) {
+            case leftToRight:
+                device.dragCoordinates(new Point(leftX, midY), new Point(rightX, midY));
+                break;
+
+            case rightToLeft:
+                device.dragCoordinates(new Point(rightX, midY), new Point(leftX, midY));
+                break;
+            default:
+                throw new RuntimeException("Invalid direction " + direction);
         }
+    }
+    public void swipeLeft() {
+        swipe(Direction.rightToLeft);
     }
 
     public void swipeRight() {
-        JSONObject screen = device.screen();
-        try {
-            int midY = screen.getInt("height") / 2;
-            int maxX = (int)(0.99 * screen.getInt("width"));
-            int minX = (int)(0.01 * maxX);
-            device.dragCoordinates(new Point(minX, midY), new Point(maxX, midY));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        swipe(Direction.leftToRight);
     }
 }
