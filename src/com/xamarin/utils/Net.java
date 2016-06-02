@@ -8,8 +8,10 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.net.URI;
 
 /**
@@ -17,7 +19,7 @@ import java.net.URI;
  */
 public class Net {
 
-    public static JSONObject postJSON(URI uri, String json) {
+    public static JSONObject postJSON(URI uri, String json) throws IOException, JSONException {
         HttpClient httpClient = new DefaultHttpClient();
 
         try {
@@ -40,11 +42,11 @@ public class Net {
             return null;
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            httpClient.getConnectionManager().shutdown();
+            throw ex;
         } finally {
             httpClient.getConnectionManager().shutdown();
         }
-        return null;
     }
 
     public static JSONObject get(URI uri) {

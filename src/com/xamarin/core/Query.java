@@ -54,4 +54,8 @@ public class Query {
     public void setParam(String key, JSONArray val) {
         _setParam(key, val);
     }
+
+    public String toString() {
+        return this.json.toString();
+    }
 }

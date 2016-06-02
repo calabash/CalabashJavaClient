@@ -98,11 +98,13 @@ public class ElementList implements Gestureable, Existable, Iterable<Element> {
     }
 
     public void waitUntilExists() {
-        Wait.until(new ExistsCondition(this));
+        Wait.until(new ExistsCondition(this),
+                String.format("Timeout waiting for element(s): %s", this.query));
     }
 
     public void waitUntilDoesntExist() {
-        Wait.until(new ExistsCondition(this, false));
+        Wait.until(new ExistsCondition(this, false),
+                String.format("Timeout waiting for element(s) to not exist: %s", this.query));
     }
 
     private ElementList with(@NonNull String key, @NonNull String val) {

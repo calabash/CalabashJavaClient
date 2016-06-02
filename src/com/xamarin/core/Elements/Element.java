@@ -3,8 +3,11 @@ package com.xamarin.core.Elements;
 import com.xamarin.core.Device;
 import com.xamarin.core.Exceptions.ElementNoLongerExistsException;
 import com.xamarin.core.Query;
+import com.xamarin.utils.Geometry;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.awt.*;
 
 /**
  * Created by chrisf on 5/25/16.
@@ -61,12 +64,21 @@ public class Element implements Gestureable, Existable {
         return attr("label");
     }
 
-    public String rect() {
-        return attr("rect");
+    public JSONObject rect() {
+        try {
+            return new JSONObject(attr("rect"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public String text() {
         return attr("text");
+    }
+
+    public String title() {
+        return attr("title");
     }
 
     public String placeholder() {
@@ -78,7 +90,9 @@ public class Element implements Gestureable, Existable {
         if (desc == null) desc = id();
         if (desc == null) desc = label();
         if (desc == null) desc = placeholder();
-        return desc != null ? desc : "";
+        if (desc == null) desc = title();
+        if (desc == null) desc = "Element with rect: " + rect().toString();
+        return desc;
     }
 
     public Element tap() {
@@ -103,5 +117,21 @@ public class Element implements Gestureable, Existable {
                         "'options' : { 'string' : \"" + text + "\"} " +
                         "}");
         return this;
+    }
+
+    public String toString() {
+        return desc();
+    }
+
+    public void scrollDown() {
+        JSONObject rect = rect();
+        Rectangle r = Geometry.jsonToRectangle(rect);
+        int midX, startY, endY;
+        midX = (r.x + r.width) / 2;
+        startY = (int)(r.y + (0.1 * r.height));
+        endY = (int)(r.y + (0.9 * r.height));
+        Point one = new Point(midX, startY);
+        Point two = new Point(midX, endY);
+        device.
     }
 }

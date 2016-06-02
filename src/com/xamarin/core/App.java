@@ -36,8 +36,6 @@ public class App {
     }
 
     public App(String bundleID, String pathToBundle) {
-        System.out.println("Application: " + (bundleID == null ? pathToBundle : bundleID));
-
         this.bundleID = bundleID;
         this.pathToBundle = pathToBundle;
     }
@@ -59,31 +57,15 @@ public class App {
     }
 
     private JSONObject gesture(String gesture, String specifiers) {
-        return gesture(gesture, specifiers, "{}");
+        return device.gesture(gesture, specifiers);
     }
 
     private JSONObject gesture(String gesture, String specifiers, String options) {
-        try {
-            JSONObject payload = new JSONObject();
-            payload.put("gesture", gesture);
-            payload.put("specifiers", new JSONObject(specifiers));
-            payload.put("options", new JSONObject(options));
-            return device.gesture(payload.toString());
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return device.gesture(gesture, specifiers, options);
     }
 
     public void dragCoordinates(Point one, Point two) {
-        System.out.println(String.format("I drag from %d, %d to %d, %d", one.x, one.y, two.x, two.y));
-        gesture("drag", "{ 'coordinates' : [[" + one.x + ", " + one.y + "], [" + two.x + ", " + two.y + "]]}");
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        device.dragCoordinates(one, two);
     }
 
     public Element enterText(Element element, String text) {
@@ -112,5 +94,9 @@ public class App {
 
     public void waitForElementToNotExist(final ElementList element) {
         element.waitUntilDoesntExist();
+    }
+
+    public void scrollDown(Element element) {
+        element.scrollDown();
     }
 }

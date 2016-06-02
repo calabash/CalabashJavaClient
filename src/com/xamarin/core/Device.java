@@ -1,13 +1,17 @@
 package com.xamarin.core;
 
 import com.xamarin.core.Exceptions.DeviceAgentNotRunningException;
+import com.xamarin.core.Exceptions.TimeoutException;
 import com.xamarin.core.Wait.Condition;
 import com.xamarin.core.Wait.Wait;
 import com.xamarin.utils.Net;
 import com.xamarin.utils.ShellCommand;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.awt.*;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -40,13 +44,16 @@ public class Device {
     public App launch(App app) {
         ensureDeviceAgentRunning();
         try {
+            System.out.print("launching " + app.bundleID + "...");
             killSession();
             Thread.sleep(1000);
             Net.postJSON(new URI(route("session")), "{ 'bundleID' : '" + app.bundleID + "' }");
             app.setDevice(this);
             Thread.sleep(1000);
+            System.out.println("Success!");
             return app;
         } catch (Exception e) {
+            System.out.println("Failed.");
             e.printStackTrace();
         }
         return null;
@@ -60,7 +67,8 @@ public class Device {
         ensureDeviceAgentRunning();
         try {
             return Net.postJSON(new URI(route("query")), json);
-        } catch (URISyntaxException e) {
+        } catch (Exception e) {
+            ensureDeviceAgentRunning();
             e.printStackTrace();
         }
         return null;
@@ -72,6 +80,7 @@ public class Device {
             Thread.sleep(500);
             return Net.postJSON(new URI(route("gesture")), json);
         } catch (Exception e) {
+            ensureDeviceAgentRunning();
             e.printStackTrace();
         }
         return null;
@@ -98,20 +107,52 @@ public class Device {
         return null;
     }
 
-    public void startDeviceAgent() {
-        ShellCommand.asyncShell(new String[]{
-                "/usr/local/bin/xctestctl",
-                "-d", this.deviceID,
-                "-r", ShellCommand.$HOME() + "/.calabash/DeviceAgent/CBX-Runner.app",
-                "-t", ShellCommand.$HOME() + "/.calabash/DeviceAgent/CBX-Runner.app/PlugIns/CBX.xctest"
-        });
+    public void stopDeviceAgent() {
+        System.out.println("Stopping DeviceAgent...");
+        try {
+            Net.postJSON(new URI(route("shutdown")), "{}");
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            //
+        }
         Wait.until(new Condition() {
             @Override
             public boolean check() {
-                return deviceAgentIsRunning();
+                return !deviceAgentIsRunning();
             }
-        });
-        ensureDeviceAgentRunning();
+        }, "Timeout waiting for DeviceAgent to stop.");
+        System.out.println("DeviceAgent is no longer running on device " + this.deviceID);
+        Wait.seconds(2);
+    }
+
+    public void startDeviceAgent() {
+        for (int i = 0; i < 3; i++) {
+            try {
+                if (deviceAgentIsRunning()) {
+                    stopDeviceAgent();
+                }
+
+                System.out.println("Starting DeviceAgent...");
+                ShellCommand.asyncShell(new String[]{
+                        "/usr/local/bin/xctestctl",
+                        "-d", this.deviceID,
+                        "-r", ShellCommand.$HOME() + "/.calabash/DeviceAgent/CBX-Runner.app",
+                        "-t", ShellCommand.$HOME() + "/.calabash/DeviceAgent/CBX-Runner.app/PlugIns/CBX.xctest"
+                });
+                Wait.until(new Condition() {
+                    @Override
+                    public boolean check() {
+                        return deviceAgentIsRunning();
+                    }
+                }, "Timeout waiting for DeviceAgent to start.");
+                System.out.println("Started DeviceAgent on device " + this.deviceID);
+                break;
+            } catch (TimeoutException e) {
+                System.out.println("Unable to start DeviceAgent, retrying...");
+            }
+        }
+        Wait.seconds(2);
     }
 
     public void ensureDeviceAgentRunning() {
@@ -130,5 +171,33 @@ public class Device {
 //            e.printStackTrace();
         }
         return false;
+    }
+
+    public void dragCoordinates(Point one, Point two) {
+        System.out.println(String.format("I drag from %d, %d to %d, %d", one.x, one.y, two.x, two.y));
+        gesture("drag", "{ 'coordinates' : [[" + one.x + ", " + one.y + "], [" + two.x + ", " + two.y + "]]}");
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public JSONObject gesture(String gesture, String specifiers) {
+        return gesture(gesture, specifiers, "{}");
+    }
+
+    public JSONObject gesture(String gesture, String specifiers, String options) {
+        try {
+            JSONObject payload = new JSONObject();
+            payload.put("gesture", gesture);
+            payload.put("specifiers", new JSONObject(specifiers));
+            payload.put("options", new JSONObject(options));
+            return gesture(payload.toString());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

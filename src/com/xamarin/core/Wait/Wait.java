@@ -7,20 +7,33 @@ import com.xamarin.core.Exceptions.TimeoutException;
  * Created by chrisf on 6/1/16.
  */
 public class Wait {
-    private static final long DEFAULT_TIMEOUT = 30 * 1000;
+    private static final long DEFAULT_TIMEOUT = 15 * 1000;
 
-    public static void until(final Condition condition) {
-        until(condition, DEFAULT_TIMEOUT);
+    public static void seconds(int seconds) {
+        try {
+            Thread.sleep(seconds * 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
-    public static void until(final Condition condition, final long timeout) {
+    public static void until(final Condition condition, String message) {
+        until(condition, DEFAULT_TIMEOUT, message);
+    }
+
+    public static void until(final Condition condition) {
+        until(condition, DEFAULT_TIMEOUT, null);
+    }
+
+    public static void until(final Condition condition, final long timeout, final String message) {
+
         new Thread(new Runnable() {
             @Override
             public void run() {
                 Date start = new Date();
                 while ( new Date().getTime() - start.getTime() < timeout) {
                     try {
-                        if (condition.check()) {
+                        if (( condition.status = condition.check() )) {
                             synchronized (condition) {
                                 condition.notify();
                                 return;
@@ -30,15 +43,20 @@ public class Wait {
                     } catch (Exception e) {
                         //silence
                     }
-
                 }
-                throw new TimeoutException();
+                synchronized(condition) {
+                    condition.notify();
+                }
             }
         }).start();
+
         synchronized(condition) {
             try {
                 condition.wait();
-            } catch (TimeoutException e) {
+                if (!condition.status) {
+                    throw new TimeoutException(message);
+                }
+            } catch (RuntimeException e) {
                 throw e;
             } catch (Exception e) {
                 e.printStackTrace();
