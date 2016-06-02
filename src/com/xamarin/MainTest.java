@@ -11,13 +11,14 @@ public class MainTest extends TestCase {
 
     private String serverURL = "http://10.0.2.199:27753";
     private String taskyBundleID = "com.xamarin.samples.taskytouch";
-    private Device device = new Device(serverURL);
+    private Device device;
+    private String simID = "334B1CE8-327B-448E-B395-0538674729F7";
     App app;
 
     public void setUp() throws Exception {
         super.setUp();
 
-        device = new Device("5701E69C-F464-425D-B33C-97EDAC1DB8EB");
+        device = new Device(simID);
         device.startDeviceAgent();
         app = new App("com.apple.Preferences");
         device.launch(app);

@@ -63,7 +63,7 @@ public class Net {
             return null;
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+//            ex.printStackTrace();
         } finally {
             httpClient.getConnectionManager().shutdown();
         }

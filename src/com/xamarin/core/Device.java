@@ -43,6 +43,7 @@ public class Device {
             killSession();
             Thread.sleep(1000);
             Net.postJSON(new URI(route("session")), "{ 'bundleID' : '" + app.bundleID + "' }");
+            app.setDevice(this);
             Thread.sleep(1000);
             return app;
         } catch (Exception e) {
@@ -98,11 +99,11 @@ public class Device {
     }
 
     public void startDeviceAgent() {
-        ShellCommand.shell(new String[] {
+        ShellCommand.asyncShell(new String[]{
                 "/usr/local/bin/xctestctl",
                 "-d", this.deviceID,
-                "-r", "$HOME/.calabash/DeviceAgent/CBX-Runner.app",
-                "-t", "$HOME/.calabash/DeviceAgent/CBX-Runner.app/PlugIns/CBX.xctest"
+                "-r", ShellCommand.$HOME() + "/.calabash/DeviceAgent/CBX-Runner.app",
+                "-t", ShellCommand.$HOME() + "/.calabash/DeviceAgent/CBX-Runner.app/PlugIns/CBX.xctest"
         });
         Wait.until(new Condition() {
             @Override
@@ -126,7 +127,7 @@ public class Device {
                 return true;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
         return false;
     }

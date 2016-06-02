@@ -13,6 +13,10 @@ public class ShellCommand {
         return new ShellCommand(cmd).execute();
     }
 
+    public static void asyncShell(String[] cmd) {
+        new ShellCommand(cmd, false).execute();
+    }
+
     public ShellCommand(@NonNull String[] cmd) {
         this(cmd, true);
     }
@@ -22,6 +26,11 @@ public class ShellCommand {
         this.wait = wait;
     }
 
+    public static String $HOME() {
+        String homeDir = System.getenv("HOME");
+        return homeDir;
+    }
+
     public String execute() {
         System.out.print("$ ");
         for (String aCmd : this.cmd) {
@@ -29,7 +38,7 @@ public class ShellCommand {
         }
         System.out.println();
         try {
-            Process p = Runtime.getRuntime().exec(this.cmd);
+            final Process p = Runtime.getRuntime().exec(this.cmd);
             if (this.wait) {
                 p.waitFor();
                 BufferedReader reader =
@@ -44,7 +53,18 @@ public class ShellCommand {
                 String resp = sb.toString();
                 System.out.println("==> " + resp);
                 return resp;
+
             } else {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            p.waitFor();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
                 return null;
             }
         } catch (Exception e) {

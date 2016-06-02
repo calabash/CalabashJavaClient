@@ -14,7 +14,7 @@ public class Wait {
     }
 
     public static void until(final Condition condition, final long timeout) {
-        new Runnable() {
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 Date start = new Date();
@@ -26,19 +26,23 @@ public class Wait {
                                 return;
                             }
                         }
+                        Thread.sleep(200);
                     } catch (Exception e) {
                         //silence
                     }
+
                 }
                 throw new TimeoutException();
             }
-        }.run();
-        try {
-            condition.wait();
-        } catch (TimeoutException e) {
-            throw e;
-        } catch (Exception e) {
-            e.printStackTrace();
+        }).start();
+        synchronized(condition) {
+            try {
+                condition.wait();
+            } catch (TimeoutException e) {
+                throw e;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }
