@@ -3,6 +3,7 @@ package com.xamarin;
 import com.xamarin.core.App;
 import com.xamarin.core.Device;
 import com.xamarin.core.Elements.Element;
+import com.xamarin.utils.Direction;
 import junit.framework.TestCase;
 
 /**
@@ -30,7 +31,7 @@ public class ExampleTests extends TestCase {
         app = device.launch("com.apple.Preferences");
 
         Element table = app.elements().withType("table").first();
-        Element safariButton = app.scrollFromDownToUpTo(
+        Element safariButton = app.scrollTo(Direction.downToUp,
                 table,
                 app.elements().withText("Safari"));
 

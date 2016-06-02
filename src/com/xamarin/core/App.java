@@ -123,6 +123,9 @@ public class App {
         return element.scrollTo(Direction.downToUp, target);
     }
 
+    public Element scrollTo(Direction direction, final Element element, final ElementList target) {
+        return element.scrollTo(direction, target);
+    }
 
 
     public void swipeLeft() {
