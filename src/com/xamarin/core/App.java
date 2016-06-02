@@ -5,6 +5,7 @@ import com.xamarin.core.Elements.ElementList;
 import com.xamarin.core.Exceptions.AmbiguousMatchException;
 import com.xamarin.core.Wait.Condition;
 import com.xamarin.core.Wait.Wait;
+import com.xamarin.utils.Direction;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,6 +73,10 @@ public class App {
         return element.enterText(text);
     }
 
+    public void enterText(String text) {
+        device.gesture("enter_text", "{}", "{ 'string' : " + text + "}");
+    }
+
     public Element enterText(ElementList elements, String text) throws AmbiguousMatchException {
         return elements.enterText(text);
     }
@@ -84,19 +89,63 @@ public class App {
         return elements.tap();
     }
 
-    public void waitForElement(final ElementList element) {
-        element.waitUntilExists();
+    public Element waitUntilAnyExist(final ElementList elements) {
+        elements.waitUntilExists();
+        return elements.first();
     }
 
     public void waitUntil(final Condition condition) {
         Wait.until(condition);
     }
 
-    public void waitForElementToNotExist(final ElementList element) {
-        element.waitUntilDoesntExist();
+    public void waitForElementToNotExist(final ElementList elements) {
+        elements.waitUntilNoneExist();
     }
 
-    public void scrollDown(Element element) {
-        element.scrollDown();
+    public void scrollFromUpToDown(Element element) {
+        element.scrollFromUpToDown();
+    }
+    public void scrollFromDownToUp(Element element) {
+        element.scrollFromDownToUp();
+    }
+    public void scrollFromLeftToRight(Element element) {
+        element.scrollFromLeftToRight();
+    }
+    public void scrollFromRightToLeft(Element element) {
+        element.scrollFromRightToLeft();
+    }
+
+    public Element scrollFromUpToDownTo(final Element element, final ElementList target) {
+        return element.scrollTo(Direction.upToDown, target);
+    }
+
+    public Element scrollFromDownToUpTo(final Element element, final ElementList target) {
+        return element.scrollTo(Direction.downToUp, target);
+    }
+
+
+
+    public void swipeLeft() {
+        JSONObject screen = device.screen();
+        try {
+            int midY = screen.getInt("height") / 2;
+            int maxX = (int)(0.99 * screen.getInt("width"));
+            int minX = (int)(0.01 * maxX);
+            device.dragCoordinates(new Point(maxX, midY), new Point(minX, midY));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void swipeRight() {
+        JSONObject screen = device.screen();
+        try {
+            int midY = screen.getInt("height") / 2;
+            int maxX = (int)(0.99 * screen.getInt("width"));
+            int minX = (int)(0.01 * maxX);
+            device.dragCoordinates(new Point(minX, midY), new Point(maxX, midY));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

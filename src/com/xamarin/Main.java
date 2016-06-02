@@ -16,7 +16,7 @@ public class Main {
         device.launch(myApp);
 
         ElementList login = myApp.elements().withId("Login");
-        myApp.waitForElement(login);
+        myApp.waitUntilAnyExist(login);
         myApp.tap(login);
 
         ElementList bar = myApp.elements().withText("username").withType("button");

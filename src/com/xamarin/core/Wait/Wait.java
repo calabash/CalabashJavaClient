@@ -25,13 +25,13 @@ public class Wait {
         until(condition, DEFAULT_TIMEOUT, null);
     }
 
-    public static void until(final Condition condition, final long timeout, final String message) {
+    public static void until(final Condition condition, final long timeoutMillis, final String message) {
 
         new Thread(new Runnable() {
             @Override
             public void run() {
                 Date start = new Date();
-                while ( new Date().getTime() - start.getTime() < timeout) {
+                while ( new Date().getTime() - start.getTime() < timeoutMillis) {
                     try {
                         if (( condition.status = condition.check() )) {
                             synchronized (condition) {

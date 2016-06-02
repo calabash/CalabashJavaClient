@@ -41,6 +41,10 @@ public class Device {
         }
     }
 
+    public App launch(String bundleId) {
+        return launch(new App(bundleId));
+    }
+
     public App launch(App app) {
         ensureDeviceAgentRunning();
         try {
@@ -145,11 +149,11 @@ public class Device {
                     public boolean check() {
                         return deviceAgentIsRunning();
                     }
-                }, "Timeout waiting for DeviceAgent to start.");
+                }, 20 * 1000, "Timeout waiting for DeviceAgent to start.");
                 System.out.println("Started DeviceAgent on device " + this.deviceID);
                 break;
             } catch (TimeoutException e) {
-                System.out.println("Unable to start DeviceAgent, retrying...");
+                System.out.println("Error starting DeviceAgent, retrying...");
             }
         }
         Wait.seconds(2);
@@ -174,8 +178,14 @@ public class Device {
     }
 
     public void dragCoordinates(Point one, Point two) {
+        dragCoordinates(one, two, 1.0);
+    }
+
+    public void dragCoordinates(Point one, Point two, double duration) {
         System.out.println(String.format("I drag from %d, %d to %d, %d", one.x, one.y, two.x, two.y));
-        gesture("drag", "{ 'coordinates' : [[" + one.x + ", " + one.y + "], [" + two.x + ", " + two.y + "]]}");
+        gesture("drag",
+                "{ 'coordinates' : [[" + one.x + ", " + one.y + "], [" + two.x + ", " + two.y + "]]}",
+                "{ 'duration' : " + duration + "}");
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -196,6 +206,18 @@ public class Device {
             return gesture(payload.toString());
 
         } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public JSONObject screen() {
+        try {
+            JSONObject results = Net.get(new URI(route("device")));
+            if (results != null) {
+                return results.getJSONObject("screen");
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;

@@ -7,4 +7,8 @@ public class AmbiguousMatchException extends RuntimeException {
     public AmbiguousMatchException() {
         super("Multiple elements match: query must return exactly one result");
     }
+
+    public AmbiguousMatchException(String s) {
+        super(s);
+    }
 }

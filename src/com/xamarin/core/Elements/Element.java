@@ -3,6 +3,9 @@ package com.xamarin.core.Elements;
 import com.xamarin.core.Device;
 import com.xamarin.core.Exceptions.ElementNoLongerExistsException;
 import com.xamarin.core.Query;
+import com.xamarin.core.Wait.Condition;
+import com.xamarin.core.Wait.Wait;
+import com.xamarin.utils.Direction;
 import com.xamarin.utils.Geometry;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -123,15 +126,75 @@ public class Element implements Gestureable, Existable {
         return desc();
     }
 
-    public void scrollDown() {
+    public Element scroll(Direction direction, double amount) {
         JSONObject rect = rect();
         Rectangle r = Geometry.jsonToRectangle(rect);
-        int midX, startY, endY;
+        int midX, midY, topY, bottomY, leftX, rightX;
         midX = (r.x + r.width) / 2;
-        startY = (int)(r.y + (0.1 * r.height));
-        endY = (int)(r.y + (0.9 * r.height));
-        Point one = new Point(midX, startY);
-        Point two = new Point(midX, endY);
-        device.
+        midY = (r.y + r.height) / 2;
+        topY = (int)(r.y + ((0.5 - (amount/2.0)) * r.height));
+        bottomY = (int)(r.y + ((0.5 + (amount/2.0)) * r.height));
+        leftX = (int)(r.x + ((0.5 - (amount/2.0)) * r.width));
+        rightX = (int)(r.x + ((0.5 + (amount/2.0)) * r.width));
+
+        Point one, two;
+
+        switch (direction) {
+            case upToDown:
+                one = new Point(midX, topY);
+                two = new Point(midX, bottomY);
+                break;
+            case downToUp:
+                one = new Point(midX, bottomY);
+                two = new Point(midX, topY);
+                break;
+            case leftToRight:
+                one = new Point(leftX, midY);
+                two = new Point(rightX, midY);
+                break;
+            case rightToLeft:
+                one = new Point(rightX, midY);
+                two = new Point(leftX, midY);
+                break;
+            default:
+                throw new RuntimeException(String.format("Invalid scroll direction: %s", direction));
+        }
+
+        device.dragCoordinates(one, two);
+        return this;
+    }
+
+    public Element scroll(Direction direction) {
+        return scroll(direction, .70);
+    }
+
+    public void scrollFromUpToDown() {
+        scroll(Direction.upToDown);
+    }
+
+    public void scrollFromDownToUp() {
+        scroll(Direction.downToUp);
+    }
+
+    public void scrollFromLeftToRight() {
+        scroll(Direction.leftToRight);
+    }
+
+    public void scrollFromRightToLeft() {
+        scroll(Direction.rightToLeft);
+    }
+
+    public Element scrollTo(final Direction direction, final ElementList target) {
+        System.out.println(String.format("I scroll %s looking for %s", direction, target.query));
+        Wait.until(new Condition() {
+            @Override
+            public boolean check() {
+                if (!target.exists()) {
+                    scroll(direction, 0.2);
+                }
+                return target.exists();
+            }
+        }, String.format("Timeout waiting for %s", target.query));
+        return target.first();
     }
 }

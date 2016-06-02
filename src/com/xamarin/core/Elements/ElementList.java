@@ -7,6 +7,7 @@ import com.xamarin.core.Device;
 import com.xamarin.core.Query;
 import com.xamarin.core.Wait.ExistsCondition;
 import com.xamarin.core.Wait.Wait;
+import com.xamarin.utils.Direction;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,7 +22,7 @@ import java.util.NoSuchElementException;
 public class ElementList implements Gestureable, Existable, Iterable<Element> {
     private ArrayList<Element> elements;
     private Device device;
-    private Query query;
+    public Query query;
 
     public ElementList(JSONArray elements, Device device, Query query) {
         this.device = device;
@@ -44,9 +45,9 @@ public class ElementList implements Gestureable, Existable, Iterable<Element> {
 
     public void ensureOneMatch() throws AmbiguousMatchException {
         if (elements.size() > 1) {
-            throw new AmbiguousMatchException();
+            throw new AmbiguousMatchException(this.query.toString());
         } else if (elements.size() == 0) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException(this.query.toString());
         }
     }
 
@@ -80,6 +81,28 @@ public class ElementList implements Gestureable, Existable, Iterable<Element> {
         return match.tap();
     }
 
+    public Element scroll(Direction direction) {
+        ensureOneMatch();
+        Element match = this.first();
+        return match.scroll(direction);
+    }
+
+    public Element scrollDownToUp() {
+        return scroll(Direction.downToUp);
+    }
+
+    public Element scrollUpToDown() {
+        return scroll(Direction.upToDown);
+    }
+
+    public Element scrollLeftToRight() {
+        return scroll(Direction.leftToRight);
+    }
+
+    public Element scrollRightToLeft() {
+        return scroll(Direction.rightToLeft);
+    }
+
     public boolean atLeastOneExists() {
         return exists();
     }
@@ -102,7 +125,7 @@ public class ElementList implements Gestureable, Existable, Iterable<Element> {
                 String.format("Timeout waiting for element(s): %s", this.query));
     }
 
-    public void waitUntilDoesntExist() {
+    public void waitUntilNoneExist() {
         Wait.until(new ExistsCondition(this, false),
                 String.format("Timeout waiting for element(s) to not exist: %s", this.query));
     }
@@ -119,6 +142,10 @@ public class ElementList implements Gestureable, Existable, Iterable<Element> {
 
     public ElementList withText(@NonNull String text) {
         return with("text", text);
+    }
+
+    public ElementList withTextLike(@NonNull String text) {
+        return with("text_like", text);
     }
 
     public ElementList withType(@NonNull String type) {
