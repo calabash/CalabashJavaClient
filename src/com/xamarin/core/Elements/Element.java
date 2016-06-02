@@ -4,6 +4,7 @@ import com.xamarin.core.Device;
 import com.xamarin.core.Exceptions.ElementNoLongerExistsException;
 import com.xamarin.core.Query;
 import com.xamarin.core.Wait.Condition;
+import com.xamarin.core.Wait.ExistsCondition;
 import com.xamarin.core.Wait.Wait;
 import com.xamarin.utils.Direction;
 import com.xamarin.utils.Geometry;
@@ -102,6 +103,11 @@ public class Element implements Gestureable, Existable {
         ensureExists();
         System.out.println("I tap '" + desc() + "'");
         device.gestureTestID(testID, "{'gesture' : 'touch', 'specifiers' : {}}");
+        return this;
+    }
+
+    public Element waitUntilExists() {
+        Wait.until(new ExistsCondition(this));
         return this;
     }
 

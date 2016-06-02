@@ -42,6 +42,8 @@ public class ExampleTests extends TestCase {
 
         Element duckDuckGo = app.waitUntilAnyExist(app.elements().withText("DuckDuckGo"));
         app.tap(duckDuckGo);
+
+
     }
 
     public void testSearchForRedmondInMaps() throws Exception {
@@ -60,7 +62,7 @@ public class ExampleTests extends TestCase {
         app.tap(kate);
 
         app.tap(app.elements().withText("Edit"));
-        app.enterText(app.elements().withTextLike("add phone").first(), "6097897664");
+        app.enterText("6097897664", app.elements().withTextLike("add phone").first());
         app.tap(app.elements().withText("Done"));
 
         app.swipeRight();

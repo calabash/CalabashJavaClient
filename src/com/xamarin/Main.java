@@ -21,7 +21,7 @@ public class Main {
 
         ElementList bar = myApp.elements().withText("username").withType("button");
         if (bar.exists()) {
-            myApp.enterText(bar, "bob@thebuilder.com");
+            myApp.enterText("bob@thebuilder.com", bar);
         }
     }
 

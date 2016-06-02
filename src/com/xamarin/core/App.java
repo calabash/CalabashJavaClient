@@ -69,7 +69,7 @@ public class App {
         device.dragCoordinates(one, two);
     }
 
-    public Element enterText(Element element, String text) {
+    public Element enterText(String text, Element element) {
         return element.enterText(text);
     }
 
@@ -77,7 +77,7 @@ public class App {
         device.gesture("enter_text", "{}", "{ 'string' : " + text + "}");
     }
 
-    public Element enterText(ElementList elements, String text) throws AmbiguousMatchException {
+    public Element enterText(String text, ElementList elements) throws AmbiguousMatchException {
         return elements.enterText(text);
     }
 
@@ -92,6 +92,10 @@ public class App {
     public Element waitUntilAnyExist(final ElementList elements) {
         elements.waitUntilAnyExist();
         return elements.first();
+    }
+
+    public Element waitUntilAnyExist(final Element element) {
+        return element.waitUntilExists();
     }
 
     public void waitUntil(final Condition condition) {
