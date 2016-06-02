@@ -19,7 +19,7 @@ import java.net.URI;
  */
 public class Net {
 
-    public static JSONObject postJSON(URI uri, String json) throws IOException, JSONException {
+    public static JSONObject postJSON(URI uri, String json) throws Exception {
         HttpClient httpClient = new DefaultHttpClient();
 
         try {

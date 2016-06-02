@@ -28,7 +28,7 @@ public class ElementList implements Gestureable, Existable, Iterable<Element> {
         this.device = device;
         this.query = query;
         try {
-            ArrayList<Element> els = new ArrayList<>();
+            ArrayList<Element> els = new ArrayList<Element>();
             for (int i = 0; i < elements.length(); i++) {
                 JSONObject e = elements.getJSONObject(i);
                 els.add(new Element(e, this.device, query));
@@ -67,14 +67,12 @@ public class ElementList implements Gestureable, Existable, Iterable<Element> {
         return elements.get(elements.size() - 1);
     }
 
-    @Override
     public Element enterText(String text) throws AmbiguousMatchException {
         ensureOneMatch();
         Element match = this.first();
         return match.enterText(text);
     }
 
-    @Override
     public Element tap() throws AmbiguousMatchException {
         ensureOneMatch();
         Element match = this.first();
@@ -118,7 +116,6 @@ public class ElementList implements Gestureable, Existable, Iterable<Element> {
     /*
         Returns true if any of its elements exist
      */
-    @Override
     public boolean exists() {
         for (Element e : this.elements) {
             if (e.exists()) {
@@ -164,20 +161,16 @@ public class ElementList implements Gestureable, Existable, Iterable<Element> {
         return with("type", type);
     }
 
-    @Override
     public Iterator<Element> iterator() {
         return new Iterator<Element>() {
-            @Override
             public boolean hasNext() {
                 return elements.iterator().hasNext();
             }
 
-            @Override
             public Element next() {
                 return elements.iterator().next();
             }
 
-            @Override
             public void remove() {
                 elements.iterator().remove();
             }
