@@ -130,8 +130,11 @@ public class Device {
         System.out.println("DeviceAgent is no longer running on device " + this.deviceID);
         Wait.seconds(2);
     }
-
     public void startDeviceAgent() {
+        startDeviceAgent(30);
+    }
+
+    public void startDeviceAgent(int timeoutSeconds) {
         for (int i = 0; i < 3; i++) {
             try {
                 if (deviceAgentIsRunning()) {
@@ -150,7 +153,7 @@ public class Device {
                     public boolean check() {
                         return deviceAgentIsRunning();
                     }
-                }, 20 * 1000, "Timeout waiting for DeviceAgent to start.");
+                }, timeoutSeconds * 1000, "Timeout waiting for DeviceAgent to start.");
                 System.out.println("Started DeviceAgent on device " + this.deviceID);
                 break;
             } catch (TimeoutException e) {

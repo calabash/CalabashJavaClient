@@ -31,14 +31,13 @@ public class Element implements Gestureable, Existable {
             this.exists = false;
         } else {
             try {
-                this.testID = raw.getString("test_id");
+                this.testID = raw.get("test_id").toString();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
     }
-
-    @Override
+    
     public boolean exists() {
         return this.current().exists;
     }

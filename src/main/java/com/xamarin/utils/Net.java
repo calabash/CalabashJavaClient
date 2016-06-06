@@ -19,6 +19,8 @@ import java.net.URI;
  */
 public class Net {
 
+    public static boolean shouldLog = false;
+
     public static JSONObject postJSON(URI uri, String json) throws Exception {
         HttpClient httpClient = new DefaultHttpClient();
 
@@ -95,6 +97,6 @@ public class Net {
     }
 
     private static void netLog(String s) {
-//        System.out.println(s);
+        if (shouldLog) System.out.println(s);
     }
 }
