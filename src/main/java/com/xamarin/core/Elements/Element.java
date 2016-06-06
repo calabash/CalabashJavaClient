@@ -37,7 +37,7 @@ public class Element implements Gestureable, Existable {
             }
         }
     }
-    
+
     public boolean exists() {
         return this.current().exists;
     }
