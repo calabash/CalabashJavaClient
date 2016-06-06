@@ -1,6 +1,6 @@
 package com.xamarin.core.Elements;
 
-import com.sun.javafx.beans.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import com.xamarin.core.Exceptions.AmbiguousMatchException;
 import com.xamarin.core.App;
 import com.xamarin.core.Device;

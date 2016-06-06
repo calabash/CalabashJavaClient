@@ -1,5 +1,6 @@
 package com.xamarin.core;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import com.xamarin.core.Exceptions.DeviceAgentNotRunningException;
 import com.xamarin.core.Exceptions.TimeoutException;
 import com.xamarin.core.Wait.Condition;
@@ -7,12 +8,10 @@ import com.xamarin.core.Wait.Wait;
 import com.xamarin.utils.Geometry;
 import com.xamarin.utils.Net;
 import com.xamarin.utils.ShellCommand;
-import edu.umd.cs.findbugs.annotations.NonNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.awt.*;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 

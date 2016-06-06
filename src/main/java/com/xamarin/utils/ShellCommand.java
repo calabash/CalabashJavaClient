@@ -1,6 +1,6 @@
 package com.xamarin.utils;
 
-import com.sun.javafx.beans.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
