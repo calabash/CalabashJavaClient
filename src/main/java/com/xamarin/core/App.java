@@ -3,7 +3,9 @@ package com.xamarin.core;
 import com.xamarin.core.Elements.Element;
 import com.xamarin.core.Elements.ElementList;
 import com.xamarin.core.Exceptions.AmbiguousMatchException;
+import com.xamarin.core.Exceptions.DeviceAgentNotRunningException;
 import com.xamarin.core.Wait.Condition;
+import com.xamarin.core.Wait.ExistsCondition;
 import com.xamarin.core.Wait.Wait;
 import com.xamarin.utils.Direction;
 import org.json.JSONArray;
@@ -45,14 +47,32 @@ public class App {
         return query(new Query(json), device);
     }
 
-    public static ElementList query(Query query, Device device) {
-        ElementList elements = null;
-        JSONObject results = device.query(query);
+    public static ElementList query(final Query query, final Device device) {
+        ElementList elements = new ElementList(null, device, query);
+        final JSONObject[] results = new JSONObject[1];
+        Wait.until(new Condition() {
+                       @Override
+                       public boolean check() {
+                           results[0] = device.query(query);
+                           return results[0] != null && results[0].has("result");
+                       }
+
+                       @Override
+                       public boolean failFast() {
+                           try {
+                               return !device.deviceAgentIsRunning();
+                           } catch (DeviceAgentNotRunningException e) {
+                               return true;
+                           }
+                       }
+                   },
+                30000,
+                String.format("Timeout waiting for query: %s", query.toString()));
         try {
-            JSONArray es = results.getJSONArray("result");
+            JSONArray es = results[0].getJSONArray("result");
             elements = new ElementList(es, device, query);
         } catch (JSONException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
         return elements;
     }

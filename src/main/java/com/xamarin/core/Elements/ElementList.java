@@ -27,13 +27,14 @@ public class ElementList implements Gestureable, Existable, Iterable<Element> {
     public ElementList(JSONArray elements, Device device, Query query) {
         this.device = device;
         this.query = query;
+        this.elements = new ArrayList<Element>();
         try {
-            ArrayList<Element> els = new ArrayList<Element>();
-            for (int i = 0; i < elements.length(); i++) {
-                JSONObject e = elements.getJSONObject(i);
-                els.add(new Element(e, this.device, query));
+            if (elements != null) {
+                for (int i = 0; i < elements.length(); i++) {
+                    JSONObject e = elements.getJSONObject(i);
+                    this.elements.add(new Element(e, this.device, query));
+                }
             }
-            this.elements = els;
         } catch (JSONException e) {
             e.printStackTrace();
         }

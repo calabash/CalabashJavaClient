@@ -42,8 +42,6 @@ public class ExampleTests extends TestCase {
 
         Element duckDuckGo = app.waitUntilAnyExist(app.elements().withText("DuckDuckGo"));
         app.tap(duckDuckGo);
-
-
     }
 
     public void testSearchForRedmondInMaps() throws Exception {
@@ -66,5 +64,12 @@ public class ExampleTests extends TestCase {
         app.tap(app.elements().withText("Done"));
 
         app.swipeRight();
+    }
+
+    public void testXTCiOSSample() throws Exception {
+        app = device.launch("com.xamarin.XTCiOSSampleProject");
+        Thread.sleep(10000);
+        Element webviewButton = app.elements().withText("Web View").first();
+        webviewButton.tap();
     }
 }

@@ -202,6 +202,7 @@ public class Device {
 
     public JSONObject gesture(String gesture, String specifiers, String options) {
         try {
+            query(specifiers);
             JSONObject payload = new JSONObject();
             payload.put("gesture", gesture);
             payload.put("specifiers", new JSONObject(specifiers));

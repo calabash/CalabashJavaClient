@@ -6,4 +6,5 @@ package com.xamarin.core.Wait;
 public abstract class Condition {
     public boolean status;
     public abstract boolean check();
+    public boolean failFast() { return false; }
 }

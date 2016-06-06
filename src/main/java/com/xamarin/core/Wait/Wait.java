@@ -28,12 +28,17 @@ public class Wait {
     public static void until(final Condition condition, final long timeoutMillis, final String message) {
 
         new Thread(new Runnable() {
-            @Override
             public void run() {
                 Date start = new Date();
                 while ( new Date().getTime() - start.getTime() < timeoutMillis) {
                     try {
                         if (( condition.status = condition.check() )) {
+                            synchronized (condition) {
+                                condition.notify();
+                                return;
+                            }
+                        } else if ( condition.failFast() ) {
+                            condition.status = false;
                             synchronized (condition) {
                                 condition.notify();
                                 return;
