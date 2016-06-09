@@ -13,7 +13,7 @@ public class ExampleTests extends TestCase {
 
 //    private String taskyBundleID = "com.xamarin.samples.taskytouch";
     private Device device;
-    private String simID = "334B1CE8-327B-448E-B395-0538674729F7";
+    private String simID = "5FFEF610-B60F-40F3-B309-1C2023C68C82";
     App app;
 
     public void setUp() throws Exception {
@@ -71,5 +71,16 @@ public class ExampleTests extends TestCase {
         Thread.sleep(10000);
         Element webviewButton = app.elements().withText("Web View").first();
         webviewButton.tap();
+    }
+
+    public void testBBISample() throws Exception {
+        app = device.launch("com.bbi.ConnectedCustomer");
+
+        Thread.sleep(15000);
+        Element planYourVisitButton = app.elements().withText("PLAN YOUR VISIT").first();
+        app.tap(planYourVisitButton);
+
+        Element searchField = app.elements().withType("TextField").first();
+        searchField.enterText("hello there");
     }
 }
