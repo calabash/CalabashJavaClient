@@ -57,6 +57,9 @@ public class ElementList implements Gestureable, Existable, Iterable<Element> {
     }
 
     public Element first() {
+        if (elements.size() == 0) {
+            throw new NoSuchElementException("No results found for query:" + this.query.toString());
+        }
         return elements.get(0);
     }
 
@@ -142,7 +145,19 @@ public class ElementList implements Gestureable, Existable, Iterable<Element> {
 
     private ElementList with(@NonNull String key, @NonNull String val) {
         Query q = query.copy();
+
+        /*
+        FIXME: If we haven't explicitly set the type and the current type
+        is 'any', we should remove it due to a bug in DeviceAgent.
+         */
+        if (!key.equals("type") &&
+                q.hasParam("type") &&
+                q.getParam("type").equals("any")) {
+            q.removeParam("type");
+        }
+
         q.setParam(key, val);
+
         return App.query(q, this.device);
     }
 

@@ -1,4 +1,4 @@
-package com.xamarin;
+package com.xamarin.ExampleTests;
 
 import com.xamarin.core.App;
 import com.xamarin.core.Device;
@@ -6,19 +6,31 @@ import com.xamarin.core.Elements.Element;
 import com.xamarin.utils.Direction;
 import junit.framework.TestCase;
 
-/**
- * Created by chrisf on 5/25/16.
- */
-public class ExampleTests extends TestCase {
+public class DeviceTests extends TestCase {
 
-//    private String taskyBundleID = "com.xamarin.samples.taskytouch";
     private Device device;
-    private String simID = "5FFEF610-B60F-40F3-B309-1C2023C68C82";
     App app;
 
     public void setUp() throws Exception {
         super.setUp();
-        device = new Device(simID);
+        String deviceID = "49a29c9e61998623e7909e35e8bae50dd07ef85f";
+
+
+        device = new Device(deviceID)
+                /*
+                    For a device, you must specify a codesign identity. You can get a list via
+                        `security find-identity -p codesigning`
+                    Make sure you choose one under the "valid" list!
+                */
+                .codesignedBy("iPhone Developer: Chris Fuentes (<SNIP!>)")
+                /*
+                    For a device, you *should* specify the IP address of DeviceAgent. You can do this
+                    by manually launching device agent (the 'CBX' app on your phone) and checking the
+                    device logs.
+
+                    Also ensure it's on the same WiFi network as your computer!
+                */
+                .withServerURL("http://192.168.0.14:27753");
         device.startDeviceAgent();
     }
 
@@ -60,27 +72,18 @@ public class ExampleTests extends TestCase {
         app.tap(kate);
 
         app.tap(app.elements().withText("Edit"));
+
         app.enterText("6097897664", app.elements().withTextLike("add phone").first());
         app.tap(app.elements().withText("Done"));
 
         app.swipeRight();
     }
 
-    public void testXTCiOSSample() throws Exception {
-        app = device.launch("com.xamarin.XTCiOSSampleProject");
-        Thread.sleep(10000);
-        Element webviewButton = app.elements().withText("Web View").first();
-        webviewButton.tap();
-    }
+    public void testSomethingAmazing() throws Exception {
+        //Launch the Home Screen itslef!
+        app = device.launch("com.apple.springboard");
 
-    public void testBBISample() throws Exception {
-        app = device.launch("com.bbi.ConnectedCustomer");
-
-        Thread.sleep(15000);
-        Element planYourVisitButton = app.elements().withText("PLAN YOUR VISIT").first();
-        app.tap(planYourVisitButton);
-
-        Element searchField = app.elements().withType("TextField").first();
-        searchField.enterText("hello there");
+        //launch News by tapping the Icon!
+        app.tap(app.elements().withType("Icon").withId("News"));
     }
 }
