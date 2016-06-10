@@ -27,6 +27,8 @@ public class DeviceTests extends TestCase {
                     For a device, you *should* specify the IP address of DeviceAgent. You can do this
                     by manually launching device agent (the 'CBX' app on your phone) and checking the
                     device logs.
+
+                    Also ensure it's on the same WiFi network as your computer!
                 */
                 .withServerURL("http://192.168.0.14:27753");
         device.startDeviceAgent();
