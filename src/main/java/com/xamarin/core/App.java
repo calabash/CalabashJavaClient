@@ -151,8 +151,11 @@ public class App {
         return element.scrollTo(direction, target);
     }
 
-
     public void swipe(Direction direction) {
+        swipe(direction, 1.0);
+    }
+
+    public void swipe(Direction direction, double duration) {
         Rectangle screen = device.screen();
         int midY = screen.height / 2;
         int rightX = (int)(0.99 * screen.width);
@@ -160,11 +163,11 @@ public class App {
 
         switch (direction) {
             case leftToRight:
-                device.dragCoordinates(new Point(leftX, midY), new Point(rightX, midY));
+                device.dragCoordinates(new Point(leftX, midY), new Point(rightX, midY), duration);
                 break;
 
             case rightToLeft:
-                device.dragCoordinates(new Point(rightX, midY), new Point(leftX, midY));
+                device.dragCoordinates(new Point(rightX, midY), new Point(leftX, midY), duration);
                 break;
             default:
                 throw new RuntimeException("Invalid direction " + direction);

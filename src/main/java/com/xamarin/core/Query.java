@@ -39,7 +39,11 @@ public class Query {
 
     private void _setParam(String key, Object val) {
         try {
-            this.json.put(key, val);
+            if (val == null) {
+                this.json.remove(key);
+            } else {
+                this.json.put(key, val);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -48,6 +52,19 @@ public class Query {
     public void setParam(String key, String val) {
         _setParam(key, val);
     }
+
+    public void removeParam(String key) {
+        _setParam(key, null);
+    }
+
+    public Object getParam(String key) {
+        return this.json.get(key);
+    }
+
+    public boolean hasParam(String key) {
+        return this.json.has(key);
+    }
+
     public void setParam(String key, JSONObject val) {
         _setParam(key, val);
     }

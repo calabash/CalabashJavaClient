@@ -26,9 +26,9 @@ public class ShellCommand {
         this.wait = wait;
     }
 
-    public static String $HOME() {
+    public static String $HOMEslash(String path) {
         String homeDir = System.getenv("HOME");
-        return homeDir;
+        return homeDir + "/" + path;
     }
 
     public String execute() {
@@ -56,7 +56,6 @@ public class ShellCommand {
 
             } else {
                 new Thread(new Runnable() {
-                    @Override
                     public void run() {
                         try {
                             p.waitFor();

@@ -10,6 +10,7 @@ import com.xamarin.utils.Net;
 import com.xamarin.utils.ShellCommand;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.omg.SendingContext.RunTime;
 
 import java.awt.*;
 import java.net.URI;
@@ -19,13 +20,44 @@ import java.net.URISyntaxException;
  * Created by chrisf on 5/25/16.
  */
 public class Device {
+    public enum DeviceType { SIMULATOR, DEVICE }
+    private static final int DEFAULT_TIMEOUT = 30;
     private String serverURL;
     private String deviceID;
+    private String codesignIdentity = "";
+    public DeviceType type;
     private static final String DEFAULT_SERVER_URL = "http://127.0.0.1:27753"; //localhost
 
     public Device(String deviceID) {
         this.serverURL = DEFAULT_SERVER_URL;
         this.deviceID = deviceID;
+
+        //Super crude check
+        if (this.deviceID.length() == 40) {
+            this.type = DeviceType.DEVICE;
+        } else {
+            this.type = DeviceType.SIMULATOR;
+        }
+    }
+
+    public Device(String deviceID, String codesignIdentity)  {
+        this(deviceID);
+        this.codesignIdentity = codesignIdentity;
+    }
+
+    public Device(String deviceID, String codesignIdentity, String serverURL) {
+        this(deviceID, codesignIdentity);
+        this.serverURL = serverURL;
+    }
+
+    public Device codesignedBy(String identity) {
+        this.codesignIdentity = identity;
+        return this;
+    }
+
+    public Device withServerURL(String serverURL) {
+        this.serverURL = serverURL;
+        return this;
     }
 
     private String route(String routeName) {
@@ -70,7 +102,11 @@ public class Device {
     public JSONObject query(String json) {
         ensureDeviceAgentRunning();
         try {
-            return Net.postJSON(new URI(route("query")), json);
+            JSONObject result = Net.postJSON(new URI(route("query")), json);
+            if (result != null && result.has("error")) {
+                throw new RuntimeException(result.getString("error"));
+            }
+            return result;
         } catch (Exception e) {
             ensureDeviceAgentRunning();
             e.printStackTrace();
@@ -82,7 +118,11 @@ public class Device {
         ensureDeviceAgentRunning();
         try {
             Thread.sleep(500);
-            return Net.postJSON(new URI(route("gesture")), json);
+            JSONObject result = Net.postJSON(new URI(route("gesture")), json);
+            if (result != null && result.has("error")) {
+                throw new RuntimeException(result.getString("error"));
+            }
+            return result;
         } catch (Exception e) {
             ensureDeviceAgentRunning();
             e.printStackTrace();
@@ -94,7 +134,11 @@ public class Device {
         ensureDeviceAgentRunning();
         try {
             Thread.sleep(500);
-            return Net.postJSON(new URI(route("gesture/" + testID)), json);
+            JSONObject result =  Net.postJSON(new URI(route("gesture/" + testID)), json);
+            if (result != null && result.has("error")) {
+                throw new RuntimeException(result.getString("error"));
+            }
+            return result;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -104,7 +148,11 @@ public class Device {
     public JSONObject queryTestId(String testID) {
         ensureDeviceAgentRunning();
         try {
-            return Net.get(new URI(route("query/test_id/" + testID)));
+            JSONObject result =  Net.get(new URI(route("query/test_id/" + testID)));
+            if (result != null && result.has("error")) {
+                throw new RuntimeException(result.getString("error"));
+            }
+            return result;
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -129,23 +177,49 @@ public class Device {
         System.out.println("DeviceAgent is no longer running on device " + this.deviceID);
         Wait.seconds(2);
     }
+
     public void startDeviceAgent() {
-        startDeviceAgent(30);
+        startDeviceAgent(DEFAULT_TIMEOUT);
+    }
+
+    public void startDeviceAgent(String runnerPath, String testBundlePath) {
+        startDeviceAgent(runnerPath, testBundlePath, DEFAULT_TIMEOUT);
     }
 
     public void startDeviceAgent(int timeoutSeconds) {
+        if (this.type == DeviceType.SIMULATOR) {
+            startDeviceAgent(ShellCommand.$HOMEslash(".calabash/DeviceAgent/simulator/CBX-Runner.app"),
+                    ShellCommand.$HOMEslash(".calabash/DeviceAgent/simulator/CBX-Runner.app/PlugIns/CBX.xctest"),
+                    timeoutSeconds
+            );
+        } else {
+            startDeviceAgent(ShellCommand.$HOMEslash(".calabash/DeviceAgent/device/CBX-Runner.app"),
+                    ShellCommand.$HOMEslash(".calabash/DeviceAgent/device/CBX-Runner.app/PlugIns/CBX.xctest"),
+                    timeoutSeconds
+            );
+        }
+    }
+
+    public void startDeviceAgent(String runnerPath, String testBundlePath, int timeoutSeconds) {
         for (int i = 0; i < 3; i++) {
             try {
                 if (deviceAgentIsRunning()) {
                     stopDeviceAgent();
                 }
 
+                if (this.type == DeviceType.DEVICE && this.codesignIdentity.equals("")) {
+                    throw new RuntimeException("Must specify a codesign identity for devices!\n" +
+                            "Run `security find-identity -p codesigning` to find some.\n" +
+                    "An identity will look like \"iPhone Developer: Aaron A Aaronson (A1B2C3D4E5)\" \n" +
+                    "Use `device.codesignedBy(identity)` to set the identity.");
+                }
                 System.out.println("Starting DeviceAgent...");
                 ShellCommand.asyncShell(new String[]{
                         "/usr/local/bin/xctestctl",
                         "-d", this.deviceID,
-                        "-r", ShellCommand.$HOME() + "/.calabash/DeviceAgent/CBX-Runner.app",
-                        "-t", ShellCommand.$HOME() + "/.calabash/DeviceAgent/CBX-Runner.app/PlugIns/CBX.xctest"
+                        "-r", runnerPath,
+                        "-t", testBundlePath,
+                        "-c", codesignIdentity
                 });
                 Wait.until(new Condition() {
                     @Override
@@ -188,7 +262,8 @@ public class Device {
         System.out.println(String.format("I drag from %d, %d to %d, %d", one.x, one.y, two.x, two.y));
         gesture("drag",
                 "{ 'coordinates' : [[" + one.x + ", " + one.y + "], [" + two.x + ", " + two.y + "]]}",
-                "{ 'duration' : " + duration + "}");
+                "{ 'duration' : " + duration + "}",
+                false);
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -201,8 +276,14 @@ public class Device {
     }
 
     public JSONObject gesture(String gesture, String specifiers, String options) {
+        return gesture(gesture, specifiers, options, true);
+    }
+
+    public JSONObject gesture(String gesture, String specifiers, String options, boolean ensureExists) {
         try {
-            query(specifiers);
+            if (ensureExists) {
+                query(specifiers);
+            }
             JSONObject payload = new JSONObject();
             payload.put("gesture", gesture);
             payload.put("specifiers", new JSONObject(specifiers));
@@ -210,9 +291,8 @@ public class Device {
             return gesture(payload.toString());
 
         } catch (JSONException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     public Rectangle screen() {
@@ -225,7 +305,7 @@ public class Device {
                 return Geometry.jsonToRectangle(screen);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
         return null;
     }

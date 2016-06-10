@@ -1,4 +1,4 @@
-package com.xamarin;
+package com.xamarin.ExampleTests;
 
 import com.xamarin.core.App;
 import com.xamarin.core.Device;
@@ -6,19 +6,15 @@ import com.xamarin.core.Elements.Element;
 import com.xamarin.utils.Direction;
 import junit.framework.TestCase;
 
-/**
- * Created by chrisf on 5/25/16.
- */
-public class ExampleTests extends TestCase {
+public class SimulatorTests extends TestCase {
 
-//    private String taskyBundleID = "com.xamarin.samples.taskytouch";
     private Device device;
-    private String simID = "334B1CE8-327B-448E-B395-0538674729F7";
     App app;
 
     public void setUp() throws Exception {
         super.setUp();
-        device = new Device(simID);
+        String deviceID = "334B1CE8-327B-448E-B395-0538674729F7";
+        device = new Device(deviceID);
         device.startDeviceAgent();
     }
 
@@ -60,16 +56,18 @@ public class ExampleTests extends TestCase {
         app.tap(kate);
 
         app.tap(app.elements().withText("Edit"));
+
         app.enterText("6097897664", app.elements().withTextLike("add phone").first());
         app.tap(app.elements().withText("Done"));
 
         app.swipeRight();
     }
 
-    public void testXTCiOSSample() throws Exception {
-        app = device.launch("com.xamarin.XTCiOSSampleProject");
-        Thread.sleep(10000);
-        Element webviewButton = app.elements().withText("Web View").first();
-        webviewButton.tap();
+    public void testSomethingAmazing() throws Exception {
+        //Launch the Home Screen itslef!
+        app = device.launch("com.apple.springboard");
+
+        //launch News by tapping the Icon!
+        app.tap(app.elements().withType("Icon").withId("News"));
     }
 }
