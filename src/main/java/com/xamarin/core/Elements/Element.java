@@ -84,6 +84,10 @@ public class Element implements Gestureable, Existable {
         return attr("title");
     }
 
+    public String value() {
+        return attr("value");
+    }
+
     public String placeholder() {
         return attr("placeholder");
     }
@@ -91,6 +95,7 @@ public class Element implements Gestureable, Existable {
     public String desc() {
         String desc = text();
         if (desc == null) desc = id();
+        if (desc == null) desc = value();
         if (desc == null) desc = label();
         if (desc == null) desc = placeholder();
         if (desc == null) desc = title();
